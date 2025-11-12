@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { crearGUI, crearInfo, eleccionActual, focoCamara } from "./modules/gui";
 import { cargarDatos, datosElect, datosCol, datosGeo } from "./modules/load";
+import { crearObjetosSim, escena, controlOrbital, renderer, camara } from "./modules/simObjects";
 
 // Latitud y longitud de los extremos del mapa de la imagen
 export let minLon_es = -10.24;
@@ -26,9 +26,6 @@ export let objetos = [];
 // Planos que representan a los dos mapas
 export let mapaEs, mapaCan;
 
-export let escena, camara, renderer;
-export let controlOrbital;
-
 // Se cargan los datos necesarios
 cargarDatos().then(() => {
     // Se inicializa la simulación
@@ -39,34 +36,7 @@ cargarDatos().then(() => {
 
 function init() {
     crearInfo();
-    // Creación de la escena
-    escena = new THREE.Scene();
-    
-    // Creación de la camara
-    camara = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000
-    )
-
-    camara.position.z = 5;
-
-    // Creación del renderer
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    // Redimensión de la ventana
-    window.addEventListener("resize", function(event) {
-        camara.aspect = window.innerWidth / window.innerHeight;
-        camara.updateProjectionMatrix();
-  
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    // Creación del control de tipo orbital
-    controlOrbital = new OrbitControls(camara, renderer.domElement);
+    crearObjetosSim();
 
     // Creación y texturización del plano que representa al mapa de España
     mapaEs = Plano(0, 0, 0, "España");
@@ -93,7 +63,7 @@ function Plano(x, y, z, nombre = undefined) {
     let geometria = new THREE.PlaneGeometry(5, 5);
     let material = new THREE.MeshBasicMaterial({});
     let mesh = new THREE.Mesh(geometria, material);
-    
+
     mesh.position.set(x, y, z);
     mesh.userData.mapsX = 5;
     mesh.userData.mapsY = 5;
@@ -131,7 +101,7 @@ function Cubo(x, y, z, ancho, alto, profundidad, color, nombre = undefined) {
 export function mostrarDatosEleccion(indiceEleccion, provincia) {
     let cubosEleccion, cubosProvincia;
 
-    if(eleccionActual != undefined) {
+    if (eleccionActual != undefined) {
         cubosEleccion = objetos[eleccionActual[1]];
         for (let i = 0; i < cubosEleccion.length; i++) {
             cubosProvincia = cubosEleccion[i];
@@ -140,7 +110,7 @@ export function mostrarDatosEleccion(indiceEleccion, provincia) {
             }
         }
     }
-    
+
     cubosEleccion = objetos[indiceEleccion];
     for (let i = 0; i < cubosEleccion.length; i++) {
         cubosProvincia = cubosEleccion[i];
@@ -233,7 +203,7 @@ export function obtenerColor(indiceEleccion, indicePartido, numero = true) {
 function texturizarPlano(plano, urlTextura) {
     new THREE.TextureLoader().load(
         urlTextura,
-        function(textura) {
+        function (textura) {
             plano.material.map = textura;
             plano.material.needsUpdate = true;
 
@@ -263,7 +233,7 @@ function mapeo(val, vmin, vmax, dmin, dmax) {
 
 function animationLoop() {
     requestAnimationFrame(animationLoop);
-    
+
     // Se recoloca el foco de la camara orbital
     controlOrbital.target.x = focoCamara[0];
     controlOrbital.target.y = focoCamara[1];
