@@ -9,7 +9,7 @@ A continuación, se detallan las instrucciones de ejecución del proyecto de for
 
 1. Descargar o clonar el repositorio
 
-![Menú de clonación o descarga del repositorio](assets/readme/clonar.png)
+![Menú de clonación o descarga del repositorio](static/assets/readme/clonar.png)
 
 2. Descargar e instalar la version mas reciente de ``Node.js`` desde [este enlace](https://nodejs.org/en)
 
@@ -20,7 +20,7 @@ node --version
 npm --version
 ```
 
-4. Una vez correctamente instalado ejecutar el siguiente comando desde un terminal o símbolo del sistema en el directorio o carpeta en el que se encuentre el proyecto:
+4. Una vez correctamente instalado, ejecutar el siguiente comando desde un terminal o símbolo del sistema en el directorio o carpeta en el que se encuentre el proyecto:
 
 ```
 npm install
@@ -34,15 +34,16 @@ npm run start
 
 6. Una vez ejecutado este comando se observará en la consola algo parecido a esto:
 ```
-> visor-datos-agustin@1.0.0 start
-> node server.js
+> visor-datos-agustin@1.1.0 start
+> parcel ./src/index.html
 
-Your app is listening on port 3000
+Server running at http://localhost:1234
 ```
 
-7. Abrir un navegador y, en la barra de direcciones, escribir ```localhost:3000``` sustituyendo el 3000 por el número indicado anteriormente.
+7. Abrir un navegador y, en la barra de direcciones, escribir ```localhost:1234```
 
 8. Para terminar la simulación, pulsar la combinación de botones ```Ctrl + C``` en la consola donde se realizó el paso 5
+
 
 ## Datos
 
@@ -90,7 +91,7 @@ La cámara se puede controlar con el ratón. Para mover la cámara basta con cli
 
 La simulación incluye un panel de control con diferentes opciones explicadas a continuación.
 
-![Controles de la simulación](assets/readme/controles.png)
+![Controles de la simulación](static/assets/readme/controles.png)
 
 ### Selector de mapa
 
@@ -106,11 +107,11 @@ El selector denominado __Elección seleccionada__ permite seleccionar el proceso
 
 El selector denominado __Provincia__ permite seleccionar la provincia sobre la que se quieren visualizar datos. Al seleccionar una provincia se eliminarán del mapa todos los datos que no correspondan a esa provincia. Además, la cámara pasará a orbitar alrededor de los datos de la provincia seleccionada.
 
-![Vista del mapa con provincia seleccionada](assets/readme/vista_seleccionada.png)
+![Vista del mapa con provincia seleccionada](static/assets/readme/vista_seleccionada.png)
 
 Para volver a visualizar el resto de provincias basta con seleccionar la opción `Todas`.
 
-![Vista del mapa con todas las provincias seleccionadas](assets/readme/vista_todas.png)
+![Vista del mapa con todas las provincias seleccionadas](static/assets/readme/vista_todas.png)
 
 ## Visualización de resultados
 
@@ -118,11 +119,11 @@ En la parte superior izquierda de la pantalla se pueden visualizar el número de
 
 Al seleccionar todas las provincias, se visualizarán los resultados a nivel nacional.
 
-![Visualización de resultados a nivel nacional](assets/readme/res_nac.png)
+![Visualización de resultados a nivel nacional](static/assets/readme/res_nac.png)
 
 Al seleccionar una provincia se pueden visualizar los resultados por partido en esa provincia.
 
-![Visualización de resultados a nivel provincial](assets/readme/res_prov.png)
+![Visualización de resultados a nivel provincial](static/assets/readme/res_prov.png)
 
 ## Referencias
 Los resultados electorales han sido sacados de la [Web de Información Electoral del Ministerio del Interior](https://infoelectoral.interior.gob.es/es/inicio/).
