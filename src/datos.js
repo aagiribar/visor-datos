@@ -1,24 +1,22 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { GUI } from 'lil-gui';
+import { crearGUI, crearInfo, eleccionActual, focoCamara } from "./modules/gui";
 
 // Latitud y longitud de los extremos del mapa de la imagen
-let minLon_es = -10.24;
-let maxLon_es = 5.03;
-let minLat_es = 34.81;
-let maxLat_es = 44.26;
+export let minLon_es = -10.24;
+export let maxLon_es = 5.03;
+export let minLat_es = 34.81;
+export let maxLat_es = 44.26;
 
-let minLon_can = -18.402;
-let maxLon_can = -13.310;
-let minLat_can = 27.406;
-let maxLat_can = 29.473;
+export let minLon_can = -18.402;
+export let maxLon_can = -13.310;
+export let minLat_can = 27.406;
+export let maxLat_can = 29.473;
 
 // Array con parte de los nombres de los archivos de datos
-const elecciones = ["1977", "1979", "1982", "1986", "1989", "1993", "1996", "2000", "2004", "2008", "2011", "2015", "2016", "04_2019", "11_2019", "2023"];
+export const elecciones = ["1977", "1979", "1982", "1986", "1989", "1993", "1996", "2000", "2004", "2008", "2011", "2015", "2016", "04_2019", "11_2019", "2023"];
 // Array con los textos que mostrar en el selector
-const textosElecciones = ["Junio de 1977", "Marzo de 1979", "Octubre de 1982", "Junio de 1986", "Octubre de 1989", "Junio de 1993", "Marzo de 1996", "Marzo de 2000", "Marzo de 2004", "Marzo de 2008", "Noviembre de 2011", "Diciembre de 2015", "Junio de 2016", "Abril de 2019", "Noviembre de 2019", "Julio de 2023"];
-// Array que contiene el valor y el indice del proceso electoral seleccionado
-let eleccionActual;
+export const textosElecciones = ["Junio de 1977", "Marzo de 1979", "Octubre de 1982", "Junio de 1986", "Octubre de 1989", "Junio de 1993", "Marzo de 1996", "Marzo de 2000", "Marzo de 2004", "Marzo de 2008", "Noviembre de 2011", "Diciembre de 2015", "Junio de 2016", "Abril de 2019", "Noviembre de 2019", "Julio de 2023"];
 
 // Array que contiene los datos electorales cargados desde los ficheros.
 // Cada elemento del array es un objeto con la siguiente estructura
@@ -26,46 +24,28 @@ let eleccionActual;
 // encabezados: Encabezado del fichero de datos
 // resultados: Array que contiene 52 arrays con los resultados de cada provincia
 // totales: Array con los resultados totales a nivel nacional
-let datosElect = [];
+export let datosElect = [];
+
 // Array que contiene los datos geográficos de las 52 provincias de España
 // Cada elemento es un objeto con la siguiente estructura
 // nombre: Nombre de la provincia
 // latitud: Latitud de la provincia
 // longitud: Longitud de la provincia
-let datosGeo = [];
+export let datosGeo = [];
+
 // Array que contiene los datos de colores de los diferentes partidos
 // Cada elemento del array es un array que contiene los colores en el mismo orden en los que aparecen en los ficheros correspondientes a cada elección
-let datosCol = [];
-
-// Array en el que se cargarán los nombres de las provincias
-let nombresProvincias = [];
-let provinciaActual = "Todas";
+export let datosCol = [];
 
 // Array en el que se almacenarán los cubos creados para representar los datos
 // Contiene un array por cada elección y, a su vez, cada array contendrá un array por provincia en el que se almacenarán los cubos correspondientes a esa provincia
-let objetos = [];
-
-// Variable para almacenar el elemento de información mostrado actualmente
-let infoActual;
-// Array en el que se almacenan los elementos HTML creados para mostrar los resultados nacionales
-let elementosInfoGeneral = [];
-// Array en el que se almacenan los elementos HTML creados para mostrar los resultados locales
-let elementosInfoProvincias = [];
+export let objetos = [];
 
 // Planos que representan a los dos mapas
-let mapaEs, mapaCan;
+export let mapaEs, mapaCan;
 
-let escena, camara, renderer;
-let focoCamara;
-let controlOrbital;
-
-// Creación de la interfaz de usuario
-const gui = new GUI();
-let elementosUI;
-let selectorMapa, selectorEleccion, selectorProvincia;
-
-// Elemento de información para mostrar en pantalla
-let info;
+export let escena, camara, renderer;
+export let controlOrbital;
 
 // Se cargan los datos necesarios
 cargarDatos().then(() => {
@@ -76,24 +56,7 @@ cargarDatos().then(() => {
 });
 
 function init() {
-    // Elemento de información para visualizar los resultados
-    info = document.createElement('div');
-    info.style.position = 'absolute';
-    info.style.top = '30px';
-    info.style.width = '100%';
-    info.style.textAlign = 'left';
-    info.style.color = '#fff';
-    info.style.fontWeight = 'bold';
-    info.style.backgroundColor = 'transparent';
-    info.style.zIndex = '1';
-    info.style.fontFamily = 'Monospace';
-    info.innerHTML = "Resultados";
-    document.body.appendChild(info);
-    crearInfoResultadosGeneral();
-    crearInfoResultadosProvincia();
-    info.appendChild(elementosInfoGeneral[0]);
-    infoActual = elementosInfoGeneral[0];
-
+    crearInfo();
     // Creación de la escena
     escena = new THREE.Scene();
     
@@ -131,79 +94,7 @@ function init() {
     mapaCan = Plano(-10, 0, 0, "Canarias");
     texturizarPlano(mapaCan, "/static/assets/mapa_can.png");
 
-    // Inicialización del punto sobre el que orbita la cámara al principio de la simulación
-    focoCamara = [0, 0, 0];
-
-    // Objeto que almacena los elementos de la interfaz de usuario
-    elementosUI = {
-        "Mapa seleccionado": "España",
-        "Elección seleccionada": textosElecciones[0],
-        "Provincia": "Todas"
-    }
-
-    // Selector de mapa sobre el que orbitará la cámara
-    selectorMapa = gui.add(elementosUI, "Mapa seleccionado", ["España", "Canarias"]);
-    selectorMapa.onChange(
-        function(valor) {
-            if (valor == "España") {
-                focoCamara = [0, 0, 0];
-            }
-            else if (valor == "Canarias") {
-                focoCamara = [-10, 0, 0];
-            }
-        }
-    );
-
-    // Selector de proceso electoral mostrado
-    selectorEleccion = gui.add(elementosUI, "Elección seleccionada", textosElecciones);
-    selectorEleccion.onChange(
-        function(valor) {
-            let indice = textosElecciones.findIndex((texto) => valor == texto);
-            mostrarDatosEleccion(indice, provinciaActual);
-            // Se modifica el elemento de información para mostrar los datos correspondientes al proceso electoral seleccionado
-            info.removeChild(infoActual);
-            eleccionActual = [elecciones[indice], indice];
-            if (provinciaActual == "Todas") {
-                infoActual = elementosInfoGeneral[eleccionActual[1]];
-                info.appendChild(infoActual);
-            }
-            else {
-                let indice = elementosInfoProvincias[eleccionActual[1]].findIndex((elemento) => elemento.id == provinciaActual);
-                infoActual = elementosInfoProvincias[eleccionActual[1]][indice];
-                info.appendChild(infoActual);
-            }
-        }
-    );
-
-    // Selector de provincia
-    nombresProvincias = obtenerNombresProvincias();
-    nombresProvincias.push("Todas");
-
-    selectorProvincia = gui.add(elementosUI, "Provincia", nombresProvincias);
-    selectorProvincia.onChange(
-        function(valor) {
-            info.removeChild(infoActual);
-            mostrarDatosEleccion(eleccionActual[1], valor);
-            provinciaActual = valor;
-
-            // Añade el elemento de información correspondiente y cambia el foco de la cámara
-            if(valor == "Todas") {
-                selectorMapa.show();
-                focoCamara = [0, 0, 0];
-                selectorMapa.setValue("España");
-                infoActual = elementosInfoGeneral[eleccionActual[1]];
-                info.appendChild(infoActual);
-            }
-            else {
-                selectorMapa.hide();
-                let coordenadas = obtenerCoordenadasMapa(obtenerCoordenadas(valor));
-                focoCamara = [coordenadas[0], coordenadas[1], 0];
-                let indice = elementosInfoProvincias[eleccionActual[1]].findIndex((elemento) => elemento.id == valor);
-                infoActual = elementosInfoProvincias[eleccionActual[1]][indice];
-                info.appendChild(infoActual);
-            }
-        }
-    )
+    crearGUI();
 
     // Se dibujan sin mostrar los resultados en los mapas
     for (let i = 0; i < elecciones.length; i++) {
@@ -211,7 +102,6 @@ function init() {
     }
     // Se muestran los resultados del primer proceso electoral
     mostrarDatosEleccion(0, "Todas");
-    eleccionActual = [elecciones[0], 0];
 }
 
 // Función que carga los datos necesarios para la ejecución de la simulación
@@ -375,7 +265,7 @@ function Cubo(x, y, z, ancho, alto, profundidad, color, nombre = undefined) {
 // Función que mustra los datos de un proceso electoral y una provincia
 // indiceEleccion: Índice en el array en el que se almacenan los datos electores
 // provincia: Provincia que se desea visualizar. Si es "Todas" se visualizan todas
-function mostrarDatosEleccion(indiceEleccion, provincia) {
+export function mostrarDatosEleccion(indiceEleccion, provincia) {
     let cubosEleccion, cubosProvincia;
 
     if(eleccionActual != undefined) {
@@ -440,14 +330,14 @@ function dibujarDatosProvincia(datosEleccion, indiceProvincia) {
 
 // Función para obtener las coordenadas de una provincia de los datos geográficos
 // provincia: Nombre de la provincia
-function obtenerCoordenadas(provincia) {
+export function obtenerCoordenadas(provincia) {
     let provinciaEncontrada = datosGeo.find((valor) => valor.nombre == provincia);
     return [parseFloat(provinciaEncontrada.longitud), parseFloat(provinciaEncontrada.latitud)];
 }
 
 // Función que transforma las coordenadas reales a las coordenadas de los mapas creados
 // coordenadas: Array con las coordenadas [longitud, latitud]
-function obtenerCoordenadasMapa(coordenadas) {
+export function obtenerCoordenadasMapa(coordenadas) {
     let longitud, latitud;
     if (coordenadas[1] < 30) {
         // Si la latitud es inferior a 30 se mapea con respecto al mapa de las Islas Canarias
@@ -465,7 +355,7 @@ function obtenerCoordenadasMapa(coordenadas) {
 // indiceEleccion: Índice de la elección actual en el array de datos electorales
 // indicePartido: Índice del partido en los datos
 // numero: Si se desea que el valor se devuelva como número o como String
-function obtenerColor(indiceEleccion, indicePartido, numero = true) {
+export function obtenerColor(indiceEleccion, indicePartido, numero = true) {
     if (numero) {
         return parseInt(datosCol[indiceEleccion][indicePartido]);
     }
@@ -506,73 +396,6 @@ function mapeo(val, vmin, vmax, dmin, dmax) {
     //Normaliza valor en el rango de partida, t=0 en vmin, t=1 en vmax
     let t = 1 - (vmax - val) / (vmax - vmin);
     return dmin + t * (dmax - dmin);
-}
-
-// Función que devuelve un array con los nombres de las provincias
-function obtenerNombresProvincias() {
-    let nombres = [];
-
-    for (let i = 0; i < datosGeo.length; i++) {
-        nombres.push(datosGeo[i].nombre);
-    }
-
-    return nombres;
-}
-
-// Función que crea los elementos de información con los resultados nacionales (cuando se selecciona la provincia "Todas")
-function crearInfoResultadosGeneral() {
-    for (let i = 0; i < elecciones.length; i++) {
-        let totales = datosElect[i].totales;
-        let encabezados = datosElect[i].encabezados;
-        let elemento = document.createElement("div");
-
-        elemento.innerHTML = "Resultados Generales - Elecciones de " + textosElecciones[i];
-        for (let j = 1; j < totales.length; j++) {
-            let infoPartido = document.createElement("div");
-            let nombrePartido = document.createElement("span");
-            nombrePartido.innerHTML = encabezados[j];
-            nombrePartido.style.color = obtenerColor(i, j - 1, false);
-            infoPartido.appendChild(nombrePartido);
-            let diputadosPartido = document.createElement("span");
-            diputadosPartido.innerHTML = " - " + totales[j];
-            infoPartido.appendChild(diputadosPartido);
-            elemento.appendChild(infoPartido);
-        }
-        elementosInfoGeneral.push(elemento);
-    }
-}
-
-// Función que crea los elementos de información con los resultados provinciales (cuando se selecciona una provincia)
-function crearInfoResultadosProvincia() {
-    let elementosInfo = [];
-    for (let i = 0; i < elecciones.length; i++) {
-        let resultados = datosElect[i].resultados;
-        let encabezados = datosElect[i].encabezados;
-        let elementosInfoActual = [];
-
-        for (let j = 0; j < resultados.length; j++) {
-            let elemento = document.createElement("div");
-            elemento.id = resultados[j][0];
-            elemento.innerHTML = "Resultados de la provincia de " + elemento.id + " - Elecciones de " + textosElecciones[i];
-            
-            for (let k = 1; k < resultados[j].length; k++) {
-                if(resultados[j][k] != 0) {
-                    let infoPartido = document.createElement("div");
-                    let nombrePartido = document.createElement("span");
-                    nombrePartido.innerHTML = encabezados[k];
-                    nombrePartido.style.color = obtenerColor(i, k - 1, false);
-                    infoPartido.appendChild(nombrePartido);
-                    let diputadosPartido = document.createElement("span");
-                    diputadosPartido.innerHTML = " - " + resultados[j][k];
-                    infoPartido.appendChild(diputadosPartido);
-                    elemento.appendChild(infoPartido);
-                }
-            }
-            elementosInfoActual.push(elemento);
-        }
-        elementosInfo.push(elementosInfoActual);
-    }
-    elementosInfoProvincias = elementosInfo;
 }
 
 function animationLoop() {
