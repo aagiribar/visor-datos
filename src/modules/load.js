@@ -1,4 +1,22 @@
-import { elecciones } from "../datos";
+// Array con parte de los nombres de los archivos de datos
+export const elecciones = [
+    "1977", 
+    "1979", 
+    "1982", 
+    "1986", 
+    "1989", 
+    "1993", 
+    "1996", 
+    "2000", 
+    "2004", 
+    "2008", 
+    "2011", 
+    "2015", 
+    "2016", 
+    "04_2019", 
+    "11_2019", 
+    "2023"
+];
 
 // Array que contiene los datos electorales cargados desde los ficheros.
 // Cada elemento del array es un objeto con la siguiente estructura
@@ -23,49 +41,49 @@ export let datosCol = [];
 export async function cargarDatos() {
     for (let i = 0; i < elecciones.length; i++) {
         await fetch("/static/data/resultados/" + elecciones[i] + ".csv")
-        .then(respuesta => {
-            if (!respuesta.ok) {
-                throw new Error("Error: " + respuesta.statusText);
-            }
-            return respuesta.text();
-        })
-        .then(contenido => {
-            procesarDatosElect(contenido, i);
-            console.log("Fichero " + elecciones[i] + ".csv cargado");
-        })
-        .catch(error => {
-            console.error("Error al cargar el archivo", error);
-        });
+            .then(respuesta => {
+                if (!respuesta.ok) {
+                    throw new Error("Error: " + respuesta.statusText);
+                }
+                return respuesta.text();
+            })
+            .then(contenido => {
+                procesarDatosElect(contenido, i);
+                console.log("Fichero " + elecciones[i] + ".csv cargado");
+            })
+            .catch(error => {
+                console.error("Error al cargar el archivo", error);
+            });
 
         await fetch("static/data/colores/colores_" + elecciones[i] + ".csv")
-        .then(respuesta => {
-            if (!respuesta.ok) {
-                throw new Error("Error: " + respuesta.statusText);
-            }
-            return respuesta.text();
-        })
-        .then(contenido => {
-            procesarDatosColores(contenido);
-            console.log("Fichero colores_" + elecciones[i] + ".csv cargado");
-        })
-        .catch(error => {
-            console.error("Error al cargar el archivo", error);
-        });
+            .then(respuesta => {
+                if (!respuesta.ok) {
+                    throw new Error("Error: " + respuesta.statusText);
+                }
+                return respuesta.text();
+            })
+            .then(contenido => {
+                procesarDatosColores(contenido);
+                console.log("Fichero colores_" + elecciones[i] + ".csv cargado");
+            })
+            .catch(error => {
+                console.error("Error al cargar el archivo", error);
+            });
     }
 
     await fetch("static/data/datos_geo.csv")
-    .then(respuesta => {
-        if (!respuesta.ok) {
-            throw new Error("Error: " + respuesta.statusText);
-        }
-        return respuesta.text();
-    })
-    .then(contenido => {
-        procesarDatosGeo(contenido);
-    })
-    .catch(error => {
-        console.error("Error al cargar el archivo", error);
-    });
+        .then(respuesta => {
+            if (!respuesta.ok) {
+                throw new Error("Error: " + respuesta.statusText);
+            }
+            return respuesta.text();
+        })
+        .then(contenido => {
+            procesarDatosGeo(contenido);
+        })
+        .catch(error => {
+            console.error("Error al cargar el archivo", error);
+        });
 }
 
 // Función que carga los datos electorales de los diferentes procesos
@@ -108,7 +126,7 @@ function procesarDatosGeo(contenido) {
 
     for (let i = 1; i < filas.length; i++) {
         const columna = filas[i].split(sep);
-        if(columna.length > 1) {
+        if (columna.length > 1) {
             datosGeo.push({
                 nombre: columna[indices.nombre],
                 latitud: columna[indices.latitud],
@@ -136,4 +154,24 @@ function procesarDatosColores(contenido) {
     }
 
     datosCol.push(colores);
+}
+
+// Función que obtiene el color de un partido de los datos de colores
+// indiceEleccion: Índice de la elección actual en el array de datos electorales
+// indicePartido: Índice del partido en los datos
+// numero: Si se desea que el valor se devuelva como número o como String
+export function obtenerColor(indiceEleccion, indicePartido, numero = true) {
+    if (numero) {
+        return parseInt(datosCol[indiceEleccion][indicePartido]);
+    }
+    else {
+        return "#" + datosCol[indiceEleccion][indicePartido].substring(2);
+    }
+}
+
+// Función para obtener las coordenadas de una provincia de los datos geográficos
+// provincia: Nombre de la provincia
+export function obtenerCoordenadas(provincia) {
+    let provinciaEncontrada = datosGeo.find((valor) => valor.nombre == provincia);
+    return [parseFloat(provinciaEncontrada.longitud), parseFloat(provinciaEncontrada.latitud)];
 }

@@ -1,13 +1,26 @@
 import { GUI } from "lil-gui";
-import {
-    textosElecciones,
-    mostrarDatosEleccion,
-    elecciones,
-    obtenerColor,
-    obtenerCoordenadasMapa,
-    obtenerCoordenadas
-} from "../datos.js";
-import { datosElect, datosGeo } from "./load.js";
+import { datosElect, datosGeo, obtenerColor, obtenerCoordenadas, elecciones } from "./load.js";
+import { mostrarDatosEleccion, obtenerCoordenadasMapa } from "./dataObjects.js";
+
+// Array con los textos que mostrar en el selector
+export const textosElecciones = [
+    "Junio de 1977", 
+    "Marzo de 1979", 
+    "Octubre de 1982", 
+    "Junio de 1986", 
+    "Octubre de 1989", 
+    "Junio de 1993", 
+    "Marzo de 1996", 
+    "Marzo de 2000", 
+    "Marzo de 2004", 
+    "Marzo de 2008", 
+    "Noviembre de 2011", 
+    "Diciembre de 2015", 
+    "Junio de 2016", 
+    "Abril de 2019", 
+    "Noviembre de 2019", 
+    "Julio de 2023"
+];
 
 // Array en el que se cargarán los nombres de las provincias
 export let nombresProvincias = [];
@@ -174,7 +187,7 @@ function crearInfoResultadosProvincia() {
             let elemento = document.createElement("div");
             elemento.id = resultados[j][0];
             elemento.innerHTML = "Resultados de la provincia de " + elemento.id + " - Elecciones de " + textosElecciones[i];
-            
+
             for (let k = 1; k < resultados[j].length; k++) {
                 if(resultados[j][k] != 0) {
                     let infoPartido = document.createElement("div");
