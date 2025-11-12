@@ -1,14 +1,13 @@
 import { GUI } from "lil-gui";
 import {
     textosElecciones,
-    datosGeo,
     mostrarDatosEleccion,
     elecciones,
-    datosElect,
     obtenerColor,
     obtenerCoordenadasMapa,
     obtenerCoordenadas
 } from "../datos.js";
+import { datosElect, datosGeo } from "./load.js";
 
 // Array en el que se cargarán los nombres de las provincias
 export let nombresProvincias = [];

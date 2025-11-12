@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { crearGUI, crearInfo, eleccionActual, focoCamara } from "./modules/gui";
+import { cargarDatos, datosElect, datosCol, datosGeo } from "./modules/load";
 
 // Latitud y longitud de los extremos del mapa de la imagen
 export let minLon_es = -10.24;
@@ -17,25 +18,6 @@ export let maxLat_can = 29.473;
 export const elecciones = ["1977", "1979", "1982", "1986", "1989", "1993", "1996", "2000", "2004", "2008", "2011", "2015", "2016", "04_2019", "11_2019", "2023"];
 // Array con los textos que mostrar en el selector
 export const textosElecciones = ["Junio de 1977", "Marzo de 1979", "Octubre de 1982", "Junio de 1986", "Octubre de 1989", "Junio de 1993", "Marzo de 1996", "Marzo de 2000", "Marzo de 2004", "Marzo de 2008", "Noviembre de 2011", "Diciembre de 2015", "Junio de 2016", "Abril de 2019", "Noviembre de 2019", "Julio de 2023"];
-
-// Array que contiene los datos electorales cargados desde los ficheros.
-// Cada elemento del array es un objeto con la siguiente estructura
-// indice: Índice del proceso electoral dentro de datosElect
-// encabezados: Encabezado del fichero de datos
-// resultados: Array que contiene 52 arrays con los resultados de cada provincia
-// totales: Array con los resultados totales a nivel nacional
-export let datosElect = [];
-
-// Array que contiene los datos geográficos de las 52 provincias de España
-// Cada elemento es un objeto con la siguiente estructura
-// nombre: Nombre de la provincia
-// latitud: Latitud de la provincia
-// longitud: Longitud de la provincia
-export let datosGeo = [];
-
-// Array que contiene los datos de colores de los diferentes partidos
-// Cada elemento del array es un array que contiene los colores en el mismo orden en los que aparecen en los ficheros correspondientes a cada elección
-export let datosCol = [];
 
 // Array en el que se almacenarán los cubos creados para representar los datos
 // Contiene un array por cada elección y, a su vez, cada array contendrá un array por provincia en el que se almacenarán los cubos correspondientes a esa provincia
@@ -102,125 +84,6 @@ function init() {
     }
     // Se muestran los resultados del primer proceso electoral
     mostrarDatosEleccion(0, "Todas");
-}
-
-// Función que carga los datos necesarios para la ejecución de la simulación
-async function cargarDatos() {
-    for (let i = 0; i < elecciones.length; i++) {
-        await fetch("/static/data/resultados/" + elecciones[i] + ".csv")
-        .then(respuesta => {
-            if (!respuesta.ok) {
-                throw new Error("Error: " + respuesta.statusText);
-            }
-            return respuesta.text();
-        })
-        .then(contenido => {
-            procesarDatosElect(contenido, i);
-            console.log("Fichero " + elecciones[i] + ".csv cargado");
-        })
-        .catch(error => {
-            console.error("Error al cargar el archivo", error);
-        });
-
-        await fetch("static/data/colores/colores_" + elecciones[i] + ".csv")
-        .then(respuesta => {
-            if (!respuesta.ok) {
-                throw new Error("Error: " + respuesta.statusText);
-            }
-            return respuesta.text();
-        })
-        .then(contenido => {
-            procesarDatosColores(contenido);
-            console.log("Fichero colores_" + elecciones[i] + ".csv cargado");
-        })
-        .catch(error => {
-            console.error("Error al cargar el archivo", error);
-        });
-    }
-
-    await fetch("static/data/datos_geo.csv")
-    .then(respuesta => {
-        if (!respuesta.ok) {
-            throw new Error("Error: " + respuesta.statusText);
-        }
-        return respuesta.text();
-    })
-    .then(contenido => {
-        procesarDatosGeo(contenido);
-    })
-    .catch(error => {
-        console.error("Error al cargar el archivo", error);
-    });
-}
-
-// Función que carga los datos electorales de los diferentes procesos
-function procesarDatosElect(contenido, indice) {
-    const sep = ";";
-    const filas = contenido.split("\n");
-
-    const encabezados = filas[0].split(sep);
-
-    let resultados = [];
-    let totales = filas.pop();
-
-    for (let i = 1; i < filas.length; i++) {
-        const columna = filas[i].split(sep);
-        if (columna.length > 1) {
-            resultados.push(columna);
-        }
-    }
-
-    datosElect.push({
-        indice: indice,
-        encabezados: encabezados,
-        resultados: resultados,
-        totales: totales.split(sep)
-    });
-}
-
-// Función que carga los datos geográficos de las diferentes provincias
-function procesarDatosGeo(contenido) {
-    const sep = ";";
-    const filas = contenido.split("\n");
-
-    const encabezados = filas[0].split(sep);
-
-    const indices = {
-        nombre: encabezados.indexOf("Provincia"),
-        latitud: encabezados.indexOf("Latitud"),
-        longitud: encabezados.indexOf("Longitud")
-    }
-
-    for (let i = 1; i < filas.length; i++) {
-        const columna = filas[i].split(sep);
-        if(columna.length > 1) {
-            datosGeo.push({
-                nombre: columna[indices.nombre],
-                latitud: columna[indices.latitud],
-                longitud: columna[indices.longitud]
-            })
-        }
-    }
-
-    console.log("Archivo con datos geográficos cargado");
-}
-
-// Función que carga los datos de colores de los diferentes partidos a efectos de visualización
-function procesarDatosColores(contenido) {
-    const sep = ";";
-    const filas = contenido.split("\n");
-
-    const encabezados = filas[0].split(sep);
-
-    let colores = [];
-    for (let i = 1; i < filas.length; i++) {
-        const columna = filas[i].split(sep);
-        if (columna.length > 1) {
-            colores.push(columna[1]);
-        }
-    }
-
-    datosCol.push(colores);
 }
 
 // Función que crear un plano
