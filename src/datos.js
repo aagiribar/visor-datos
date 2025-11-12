@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import { GUI } from 'lil-gui';
 
 // Latitud y longitud de los extremos del mapa de la imagen
 let minLon_es = -10.24;
@@ -68,12 +68,12 @@ let selectorMapa, selectorEleccion, selectorProvincia;
 let info;
 
 // Se cargan los datos necesarios
-await cargarDatos();
-// Se inicializa la simulación
-init();
-// Se inicializa el bucle de animación
-animationLoop();
-
+cargarDatos().then(() => {
+    // Se inicializa la simulación
+    init();
+    // Se inicializa el bucle de animación
+    animationLoop();
+});
 
 function init() {
     // Elemento de información para visualizar los resultados
@@ -125,11 +125,11 @@ function init() {
 
     // Creación y texturización del plano que representa al mapa de España
     mapaEs = Plano(0, 0, 0, "España");
-    texturizarPlano(mapaEs, "mapa_es.png");
+    texturizarPlano(mapaEs, "/static/assets/mapa_es.png");
 
     // Creación y texturización del plano que representa al mapa de Canarias
     mapaCan = Plano(-10, 0, 0, "Canarias");
-    texturizarPlano(mapaCan, "mapa_can.png");
+    texturizarPlano(mapaCan, "/static/assets/mapa_can.png");
 
     // Inicialización del punto sobre el que orbita la cámara al principio de la simulación
     focoCamara = [0, 0, 0];
@@ -217,7 +217,7 @@ function init() {
 // Función que carga los datos necesarios para la ejecución de la simulación
 async function cargarDatos() {
     for (let i = 0; i < elecciones.length; i++) {
-        await fetch(elecciones[i] + ".csv")
+        await fetch("/static/data/resultados/" + elecciones[i] + ".csv")
         .then(respuesta => {
             if (!respuesta.ok) {
                 throw new Error("Error: " + respuesta.statusText);
@@ -232,7 +232,7 @@ async function cargarDatos() {
             console.error("Error al cargar el archivo", error);
         });
 
-        await fetch("colores_" + elecciones[i] + ".csv")
+        await fetch("static/data/colores/colores_" + elecciones[i] + ".csv")
         .then(respuesta => {
             if (!respuesta.ok) {
                 throw new Error("Error: " + respuesta.statusText);
@@ -248,7 +248,7 @@ async function cargarDatos() {
         });
     }
 
-    await fetch("datos_geo.csv")
+    await fetch("static/data/datos_geo.csv")
     .then(respuesta => {
         if (!respuesta.ok) {
             throw new Error("Error: " + respuesta.statusText);
@@ -312,7 +312,7 @@ function procesarDatosGeo(contenido) {
         }
     }
 
-    console.log("Archivo con datos grográficos cargado");
+    console.log("Archivo con datos geográficos cargado");
 }
 
 // Función que carga los datos de colores de los diferentes partidos a efectos de visualización
@@ -337,7 +337,7 @@ function procesarDatosColores(contenido) {
 // x, y, z: Posición del plano
 // nombre: Nombre que almacenar como información del plano
 function Plano(x, y, z, nombre = undefined) {
-    let geometria = new THREE.PlaneBufferGeometry(5, 5);
+    let geometria = new THREE.PlaneGeometry(5, 5);
     let material = new THREE.MeshBasicMaterial({});
     let mesh = new THREE.Mesh(geometria, material);
     
@@ -476,10 +476,10 @@ function obtenerColor(indiceEleccion, indicePartido, numero = true) {
 
 // Función que aplica una textura a un plano
 // plano: Plano que se va a texturizar
-// textuta: URL de la textura
-function texturizarPlano(plano, textura) {
+// textura: URL de la textura
+function texturizarPlano(plano, urlTextura) {
     new THREE.TextureLoader().load(
-        textura,
+        urlTextura,
         function(textura) {
             plano.material.map = textura;
             plano.material.needsUpdate = true;

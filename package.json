@@ -1,28 +1,28 @@
 {
-  "//1": "describes your app and its dependencies",
-  "//2": "https://docs.npmjs.com/files/package.json",
-  "//3": "updating this file will download and update your packages",
   "name": "visor-datos-agustin",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Visualización de resultados de las elecciones al Congreso de los Diputados de España por provincias realizada con three.js.",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "parcel ./src/index.html",
+    "build": "parcel build ./src/index.html"
   },
   "dependencies": {
-    "express": "^5.0.1",
-    "lil-gui": "^0.19.2"
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.2.0",
+    "lil-gui": "^0.19.2",
+    "parcel": "^2.16.0",
+    "three": "^0.180.0"
   },
-  "engines": {
-    "node": "16.x"
-  },
-  "repository": {
-    "url": "https://gomix.com/#!/project/welcome-project"
-  },
-  "license": "MIT",
   "keywords": [
-    "node",
-    "gomix",
-    "express"
-  ]
+    "threejs",
+    "example",
+    "basic"
+  ],
+  "devDependencies": {
+    "parcel-reporter-static-files-copy": "^1.5.3"
+  },
+  "staticFiles": {
+    "staticPath": "static",
+    "staticOutPath": "static"
+  }
 }
