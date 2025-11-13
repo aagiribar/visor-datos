@@ -33,4 +33,6 @@ export function crearObjetosSim() {
 
     // Creación del control de tipo orbital
     controlOrbital = new OrbitControls(camara, renderer.domElement);
+    controlOrbital.enableDamping = true;
+    controlOrbital.enablePan = false;
 }
