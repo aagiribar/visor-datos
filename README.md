@@ -3,6 +3,12 @@
 
 Visualización de resultados de las elecciones al Congreso de los Diputados de España por provincias realizada con _three.js_.
 
+## Acceso a la versión web y a vídeo demostrativo
+
+La versión web de este proyecto se encuentra en [este sandbox de codesandbox](https://3gtygw.csb.app/).
+
+El código se puede acceder desde [este enlace](https://codesandbox.io/p/sandbox/3gtygw).
+
 ## Ejecución del proyecto en local
 
 A continuación, se detallan las instrucciones de ejecución del proyecto de forma local en caso de que la version web fallara.
