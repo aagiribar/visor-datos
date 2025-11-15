@@ -9,6 +9,8 @@ La versión web de este proyecto se encuentra en [este sandbox de codesandbox](h
 
 El código se puede acceder desde [este enlace](https://codesandbox.io/p/sandbox/3gtygw).
 
+Un vídeo demostrativo de la simulación puede ser encontrado en [este enlace](https://youtu.be/2deQAGUoMj8).
+
 ## Ejecución del proyecto en local
 
 A continuación, se detallan las instrucciones de ejecución del proyecto de forma local en caso de que la version web fallara.
