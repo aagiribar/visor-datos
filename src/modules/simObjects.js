@@ -21,6 +21,8 @@ export function crearObjetosSim() {
     // Creación del renderer
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.autoClear = false;
+    
     document.body.appendChild(renderer.domElement);
 
     // Redimensión de la ventana
