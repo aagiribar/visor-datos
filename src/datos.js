@@ -1,11 +1,11 @@
-import { crearGUI, crearInfo, focoCamara } from "./modules/gui";
-import { cargarDatos } from "./modules/load";
-import { crearObjetosSim, escena, controlOrbital, renderer, camara } from "./modules/simObjects";
-import { crearObjetosDatos } from "./modules/dataObjects";
+import { createGUI, createInfo, cameraFocus } from "./modules/gui";
+import { loadData } from "./modules/load";
+import { createSimObjects, scene, orbitControl, renderer, camera } from "./modules/simObjects";
+import { createDataObjects } from "./modules/dataObjects";
 import { bgCamera, bgMaterial, bgScene, clock, createBackground } from "./modules/background";
 
 // Se cargan los datos necesarios
-cargarDatos().then(() => {
+loadData().then(() => {
     // Se inicializa la simulación
     init();
     // Se inicializa el bucle de animación
@@ -13,10 +13,10 @@ cargarDatos().then(() => {
 });
 
 function init() {
-    crearInfo();
-    crearObjetosSim();
-    crearGUI();
-    crearObjetosDatos();
+    createInfo();
+    createSimObjects();
+    createGUI();
+    createDataObjects();
     createBackground();
 }
 
@@ -28,15 +28,16 @@ function animationLoop() {
     bgMaterial.uniforms.u_time.value = elapsedTime;
 
     // Se recoloca el foco de la camara orbital
-    controlOrbital.target.x = focoCamara[0];
-    controlOrbital.target.y = focoCamara[1];
-    controlOrbital.target.z = focoCamara[2];
-    controlOrbital.update();
+    orbitControl.target.x = cameraFocus[0];
+    orbitControl.target.y = cameraFocus[1];
+    orbitControl.target.z = cameraFocus[2];
+    orbitControl.update();
 
     renderer.clear();
 
+    // Se renderiza la escene del fondo
     renderer.render(bgScene, bgCamera);
 
-    // Se renderiza la escena
-    renderer.render(escena, camara);
+    // Se renderiza la esce
+    renderer.render(scene, camera);
 }
