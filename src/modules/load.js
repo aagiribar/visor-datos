@@ -1,5 +1,5 @@
 // Array con parte de los nombres de los archivos de datos
-export const elecciones = [
+export const elections = [
     "1977", 
     "1979", 
     "1982", 
@@ -20,51 +20,53 @@ export const elecciones = [
 
 // Array que contiene los datos electorales cargados desde los ficheros.
 // Cada elemento del array es un objeto con la siguiente estructura
-// indice: Índice del proceso electoral dentro de datosElect
-// encabezados: Encabezado del fichero de datos
-// resultados: Array que contiene 52 arrays con los resultados de cada provincia
-// totales: Array con los resultados totales a nivel nacional
-export let datosElect = [];
+// index: Índice del proceso electoral dentro de datosElect
+// headers: Encabezado del fichero de datos
+// results: Array que contiene 52 arrays con los resultados de cada provincia
+// totals: Array con los resultados totales a nivel nacional
+export let electionData = [];
 
 // Array que contiene los datos geográficos de las 52 provincias de España
 // Cada elemento es un objeto con la siguiente estructura
-// nombre: Nombre de la provincia
-// latitud: Latitud de la provincia
-// longitud: Longitud de la provincia
-export let datosGeo = [];
+// name: Nombre de la provincia
+// latitude: Latitud de la provincia
+// longitude: Longitud de la provincia
+export let geoData = [];
 
 // Array que contiene los datos de colores de los diferentes partidos
 // Cada elemento del array es un array que contiene los colores en el mismo orden en los que aparecen en los ficheros correspondientes a cada elección
-export let datosCol = [];
+export let colorData = [];
 
-// Función que carga los datos necesarios para la ejecución de la simulación
-export async function cargarDatos() {
-    for (let i = 0; i < elecciones.length; i++) {
-        await fetch("/static/data/resultados/" + elecciones[i] + ".csv")
-            .then(respuesta => {
-                if (!respuesta.ok) {
-                    throw new Error("Error: " + respuesta.statusText);
+/**
+ * Función que carga los datos necesarios para la ejecución de la simulación
+ */
+export async function loadData() {
+    for (let i = 0; i < elections.length; i++) {
+        await fetch("/static/data/resultados/" + elections[i] + ".csv")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error: " + response.statusText);
                 }
-                return respuesta.text();
+                return response.text();
             })
-            .then(contenido => {
-                procesarDatosElect(contenido, i);
-                console.log("Fichero " + elecciones[i] + ".csv cargado");
+            .then(content => {
+                processElectionData(content, i);
+                console.log("Fichero " + elections[i] + ".csv cargado");
             })
             .catch(error => {
                 console.error("Error al cargar el archivo", error);
             });
 
-        await fetch("static/data/colores/colores_" + elecciones[i] + ".csv")
-            .then(respuesta => {
-                if (!respuesta.ok) {
-                    throw new Error("Error: " + respuesta.statusText);
+        await fetch("static/data/colores/colores_" + elections[i] + ".csv")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error: " + response.statusText);
                 }
-                return respuesta.text();
+                return response.text();
             })
-            .then(contenido => {
-                procesarDatosColores(contenido);
-                console.log("Fichero colores_" + elecciones[i] + ".csv cargado");
+            .then(content => {
+                processColorData(content);
+                console.log("Fichero colores_" + elections[i] + ".csv cargado");
             })
             .catch(error => {
                 console.error("Error al cargar el archivo", error);
@@ -72,65 +74,72 @@ export async function cargarDatos() {
     }
 
     await fetch("static/data/datos_geo.csv")
-        .then(respuesta => {
-            if (!respuesta.ok) {
-                throw new Error("Error: " + respuesta.statusText);
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Error: " + response.statusText);
             }
-            return respuesta.text();
+            return response.text();
         })
-        .then(contenido => {
-            procesarDatosGeo(contenido);
+        .then(content => {
+            processGeoData(content);
         })
         .catch(error => {
             console.error("Error al cargar el archivo", error);
         });
 }
 
-// Función que carga los datos electorales de los diferentes procesos
-function procesarDatosElect(contenido, indice) {
+/**
+ * Función que carga los datos electorales de los diferentes procesos
+ * @param {String} content Contenido del fichero con datos electorales
+ * @param {Number} index Índice del proceso
+ */
+function processElectionData(content, index) {
     const sep = ";";
-    const filas = contenido.split("\n");
+    const rows = content.split("\n");
 
-    const encabezados = filas[0].split(sep);
+    const headers = rows[0].split(sep);
 
-    let resultados = [];
-    let totales = filas.pop();
+    let results = [];
+    let totals = rows.pop();
 
-    for (let i = 1; i < filas.length; i++) {
-        const columna = filas[i].split(sep);
-        if (columna.length > 1) {
-            resultados.push(columna);
+    for (let i = 1; i < rows.length; i++) {
+        const column = rows[i].split(sep);
+        if (column.length > 1) {
+            results.push(column);
         }
     }
 
-    datosElect.push({
-        indice: indice,
-        encabezados: encabezados,
-        resultados: resultados,
-        totales: totales.split(sep)
+    electionData.push({
+        index: index,
+        headers: headers,
+        results: results,
+        totals: totals.split(sep)
     });
 }
 
-// Función que carga los datos geográficos de las diferentes provincias
-function procesarDatosGeo(contenido) {
+/**
+ * Función que carga los datos geográficos de las diferentes provincias
+ * @param {String} content Contenido del fichero con datos geográficos
+ */
+function processGeoData(content) {
     const sep = ";";
-    const filas = contenido.split("\n");
+    const rows = content.split("\n");
 
-    const encabezados = filas[0].split(sep);
+    const headers = rows[0].split(sep);
 
-    const indices = {
-        nombre: encabezados.indexOf("Provincia"),
-        latitud: encabezados.indexOf("Latitud"),
-        longitud: encabezados.indexOf("Longitud")
+    const indexes = {
+        names: headers.indexOf("Provincia"),
+        latitude: headers.indexOf("Latitud"),
+        longitude: headers.indexOf("Longitud")
     }
 
-    for (let i = 1; i < filas.length; i++) {
-        const columna = filas[i].split(sep);
-        if (columna.length > 1) {
-            datosGeo.push({
-                nombre: columna[indices.nombre],
-                latitud: columna[indices.latitud],
-                longitud: columna[indices.longitud]
+    for (let i = 1; i < rows.length; i++) {
+        const column = rows[i].split(sep);
+        if (column.length > 1) {
+            geoData.push({
+                name: column[indexes.names],
+                latitude: column[indexes.latitude],
+                longitude: column[indexes.longitude]
             })
         }
     }
@@ -138,40 +147,47 @@ function procesarDatosGeo(contenido) {
     console.log("Archivo con datos geográficos cargado");
 }
 
-// Función que carga los datos de colores de los diferentes partidos a efectos de visualización
-function procesarDatosColores(contenido) {
+/**
+ * Función que carga los datos de colores de los diferentes partidos a efectos de visualización
+ * @param {String} content Contenido del fichero con los datos de los colores
+ */
+function processColorData(content) {
     const sep = ";";
-    const filas = contenido.split("\n");
+    const rows = content.split("\n");
 
-    const encabezados = filas[0].split(sep);
-
-    let colores = [];
-    for (let i = 1; i < filas.length; i++) {
-        const columna = filas[i].split(sep);
-        if (columna.length > 1) {
-            colores.push(columna[1]);
+    let colors = [];
+    for (let i = 1; i < rows.length; i++) {
+        const column = rows[i].split(sep);
+        if (column.length > 1) {
+            colors.push(column[1]);
         }
     }
 
-    datosCol.push(colores);
+    colorData.push(colors);
 }
 
-// Función que obtiene el color de un partido de los datos de colores
-// indiceEleccion: Índice de la elección actual en el array de datos electorales
-// indicePartido: Índice del partido en los datos
-// numero: Si se desea que el valor se devuelva como número o como String
-export function obtenerColor(indiceEleccion, indicePartido, numero = true) {
-    if (numero) {
-        return parseInt(datosCol[indiceEleccion][indicePartido]);
+/**
+ * Función que obtiene el color de un partido de los datos de colores
+ * @param {Number} electionIndex Índice de la elección actual en el array de datos electorales
+ * @param {Number} partyIndex Índice del partido en los datos
+ * @param {Boolean} getNumber Si se desea que el valor se devuelva como número o como String
+ * @returns El color correspondiente al partido y elección seleccionados
+ */
+export function getColor(electionIndex, partyIndex, getNumber = true) {
+    if (getNumber) {
+        return parseInt(colorData[electionIndex][partyIndex]);
     }
     else {
-        return "#" + datosCol[indiceEleccion][indicePartido].substring(2);
+        return "#" + colorData[electionIndex][partyIndex].substring(2);
     }
 }
 
-// Función para obtener las coordenadas de una provincia de los datos geográficos
-// provincia: Nombre de la provincia
-export function obtenerCoordenadas(provincia) {
-    let provinciaEncontrada = datosGeo.find((valor) => valor.nombre == provincia);
-    return [parseFloat(provinciaEncontrada.longitud), parseFloat(provinciaEncontrada.latitud)];
+/**
+ * Función para obtener las coordenadas de una provincia de los datos geográficos
+ * @param {String} province Nombre de la provincia
+ * @returns Las coordenadas de la provincia buscada
+ */
+export function getCoordinates(province) {
+    let foundProvince = geoData.find((value) => value.name == province);
+    return [parseFloat(foundProvince.longitude), parseFloat(foundProvince.latitude)];
 }

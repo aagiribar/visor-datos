@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { escena } from "./simObjects";
-import { datosElect, obtenerColor, obtenerCoordenadas, elecciones } from "./load";
-import { eleccionActual } from "./gui";
+import { scene } from "./simObjects";
+import { electionData, getColor, getCoordinates, elections } from "./load";
+import { actualElection } from "./gui";
 
 // Latitud y longitud de los extremos del mapa de la imagen
 export let minLon_es = -10.24;
@@ -16,178 +16,217 @@ export let maxLat_can = 29.473;
 
 // Array en el que se almacenarán los cubos creados para representar los datos
 // Contiene un array por cada elección y, a su vez, cada array contendrá un array por provincia en el que se almacenarán los cubos correspondientes a esa provincia
-export let objetos = [];
+export let objects = [];
 
 // Planos que representan a los dos mapas
-export let mapaEs, mapaCan;
+export let mapEs, mapCan;
 
-export function crearObjetosDatos() {
+/**
+ * Función que crea los objetos que representan a los datos en la simulación
+ */
+export function createDataObjects() {
     // Creación y texturización del plano que representa al mapa de España
-    mapaEs = Plano(0, 0, 0, "España");
-    texturizarPlano(mapaEs, "/static/assets/mapa_es.png");
+    mapEs = Plane(0, 0, 0, "España");
+    texturizePlane(mapEs, "/static/assets/mapa_es.png");
 
     // Creación y texturización del plano que representa al mapa de Canarias
-    mapaCan = Plano(-10, 0, 0, "Canarias");
-    texturizarPlano(mapaCan, "/static/assets/mapa_can.png");
+    mapCan = Plane(-10, 0, 0, "Canarias");
+    texturizePlane(mapCan, "/static/assets/mapa_can.png");
 
     // Se dibujan sin mostrar los resultados en los mapas
-    for (let i = 0; i < elecciones.length; i++) {
-        objetos.push(dibujarDatosEleccion(datosElect[i]));
+    for (let i = 0; i < elections.length; i++) {
+        objects.push(drawElectionData(electionData[i]));
     }
     // Se muestran los resultados del primer proceso electoral
-    mostrarDatosEleccion(0, "Todas");
+    showElectionData(0, "Todas");
 }
 
-// Función que crear un plano
-// x, y, z: Posición del plano
-// nombre: Nombre que almacenar como información del plano
-function Plano(x, y, z, nombre = undefined) {
-    let geometria = new THREE.PlaneGeometry(5, 5);
+/**
+ * Función que crea un plano en una posición determinada
+ * @param {Number} x Posición del plano en el eje X
+ * @param {Number} y Posición del plano en el eje Y
+ * @param {Number} z Posición del plano en el eje Z 
+ * @param {String} name Nombre del plano
+ * @returns El objeto que representa al plano
+ */
+function Plane(x, y, z, name = undefined) {
+    let geometry = new THREE.PlaneGeometry(5, 5);
     let material = new THREE.MeshBasicMaterial({});
-    let mesh = new THREE.Mesh(geometria, material);
+    let mesh = new THREE.Mesh(geometry, material);
 
     mesh.position.set(x, y, z);
     mesh.userData.mapsX = 5;
     mesh.userData.mapsY = 5;
-    if (nombre != undefined) {
-        mesh.userData.nombre = nombre;
+    if (name != undefined) {
+        mesh.userData.name = name;
     }
-    escena.add(mesh);
+
+    scene.add(mesh);
     return mesh;
 }
 
-// Función para crear un cubo
-// x,y,z: Posición del cubo
-// ancho, alto, profundidad: Dimensiones del cubo
-// color: Color del cubo
-// nombre: Nombre que almacenar como información del cubo
-function Cubo(x, y, z, ancho, alto, profundidad, color, nombre = undefined) {
-    let geometria = new THREE.BoxGeometry(ancho, alto, profundidad);
+/**
+ * Función que crea un cubo de dimensiones determinadas en una posición determinada
+ * @param {Number} x Posición del cubo en el eje X 
+ * @param {Number} y Posición del cubo en el eje Y
+ * @param {Number} z Posición del cubo en el eje Z 
+ * @param {Number} width Anchura del cubo
+ * @param {Number} height Altura del cubo
+ * @param {Number} depth Profundidad del cubo
+ * @param {*} color Color del cubo
+ * @param {String} name Nombre del cubo
+ * @returns El objeto que representa al cubo
+ */
+function Cube(x, y, z, width, height, depth, color, name = undefined) {
+    let geometry = new THREE.BoxGeometry(width, height, depth);
     let material = new THREE.MeshBasicMaterial({
         color: color
     });
-    let mesh = new THREE.Mesh(geometria, material);
+    let mesh = new THREE.Mesh(geometry, material);
 
     mesh.position.set(x, y, z);
     mesh.visible = false;
-    if (nombre != undefined) {
-        mesh.userData.nombre = nombre;
+
+    if (name != undefined) {
+        mesh.userData.name = name;
     }
-    escena.add(mesh);
+
+    scene.add(mesh);
     return mesh;
 }
 
-// Función que crea los cubos de una provincia concreta
-// datosEleccion: Objeto con los datos electorales
-// indiceProvincia: Índice que representa a una provincia en el array de resultados
-function dibujarDatosProvincia(datosEleccion, indiceProvincia) {
-    let datosProvincia = datosEleccion.resultados[indiceProvincia];
-    const coordenadas = obtenerCoordenadas(datosProvincia[0]);
+/**
+ * Función que crea los cubos de una provincia concreta
+ * @param {*} electionData Objeto con los datos electorales
+ * @param {Number} provinceIndex Índice que representa a una provincia en el array de resultados
+ * @returns Array con los cubos que representan los resultados
+ */
+function drawProvinceData(electionData, provinceIndex) {
+    let provinceData = electionData.results[provinceIndex];
+    const coordinates = getCoordinates(provinceData[0]);
 
-    let cubos = [];
-    const resultados = datosEleccion.resultados[indiceProvincia];
+    let cubes = [];
+    const results = electionData.results[provinceIndex];
 
-    let profundidadAnterior = 0;
-    let zCuboAnterior = 0;
-    for (let i = 1; i < resultados.length; i++) {
-        const diputados = parseInt(resultados[i]);
-        if (diputados > 0) {
-            let coordenadasMapa = obtenerCoordenadasMapa(coordenadas);
-            let profundidad = diputados * 0.03;
-            let color = obtenerColor(datosEleccion.indice, i - 1);
-            let zNuevoCubo = zCuboAnterior + (profundidadAnterior / 2) + (profundidad / 2);
-            let cubo = Cubo(coordenadasMapa[0], coordenadasMapa[1], zNuevoCubo, 0.15, 0.15, profundidad, color, resultados[0]);
-            cubos.push(cubo);
-            profundidadAnterior = profundidad;
-            zCuboAnterior = zNuevoCubo;
+    let previousDepth = 0;
+    let previousCubeZ = 0;
+    for (let i = 1; i < results.length; i++) {
+        const seats = parseInt(results[i]);
+        if (seats > 0) {
+            let mapCoordinates = getMapCoordinates(coordinates);
+            let depth = seats * 0.03;
+            let color = getColor(electionData.index, i - 1);
+            let newCubeZ = previousCubeZ + (previousDepth / 2) + (depth / 2);
+            let cube = Cube(mapCoordinates[0], mapCoordinates[1], newCubeZ, 0.15, 0.15, depth, color, results[0]);
+            cubes.push(cube);
+            previousDepth = depth;
+            previousCubeZ = newCubeZ;
         }
     }
-    return cubos;
+    return cubes;
 }
 
-// Función que crea los diferentes cubos para la representación
-// Estos cubos se crean y se añaden a la escena pero no son visibles en un principio
-// datosEleccion: Objeto con los datos electorales
-function dibujarDatosEleccion(datosEleccion) {
-    let cubosEleccion = [];
-    for (let i = 0; i < datosEleccion.resultados.length; i++) {
-        cubosEleccion.push(dibujarDatosProvincia(datosEleccion, i));
+/**
+ * Función que crea los diferentes cubos para la representación
+ * Estos cubos se crean y se añaden a la escena pero no son visibles en un principio
+ * @param {*} electionData Objeto con los datos electorales
+ * @returns Un array con los objetos que representan los datos electorales
+ */
+function drawElectionData(electionData) {
+    let electionCubes = [];
+    for (let i = 0; i < electionData.results.length; i++) {
+        electionCubes.push(drawProvinceData(electionData, i));
     }
-    return cubosEleccion;
+    return electionCubes;
 }
 
-// Función que aplica una textura a un plano
-// plano: Plano que se va a texturizar
-// textura: URL de la textura
-function texturizarPlano(plano, urlTextura) {
+/**
+ * Función que aplica una textura a un plano
+ * @param {*} plane Plano que se va a texturizar
+ * @param {String} textureURL URL de la textura
+ */
+function texturizePlane(plane, textureURL) {
     new THREE.TextureLoader().load(
-        urlTextura,
-        function (textura) {
-            plano.material.map = textura;
-            plano.material.needsUpdate = true;
+        textureURL,
+        function (texture) {
+            plane.material.map = texture;
+            plane.material.needsUpdate = true;
 
-            const txHeight = textura.image.height;
-            const txWidth = textura.image.width;
+            const txHeight = texture.image.height;
+            const txWidth = texture.image.width;
 
             if (txHeight > txWidth) {
                 let factor = txHeight / txWidth;
-                plano.scale.set(1, factor, 1);
-                plano.userData.mapsY *= factor;
+                plane.scale.set(1, factor, 1);
+                plane.userData.mapsY *= factor;
             }
             else {
                 let factor = txWidth / txHeight;
-                plano.scale.set(factor, 1, 1);
-                plano.userData.mapsX *= factor;
+                plane.scale.set(factor, 1, 1);
+                plane.userData.mapsX *= factor;
             }
         }
     )
 }
 
-// Función que transforma las coordenadas reales a las coordenadas de los mapas creados
-// coordenadas: Array con las coordenadas [longitud, latitud]
-export function obtenerCoordenadasMapa(coordenadas) {
-    let longitud, latitud;
-    if (coordenadas[1] < 30) {
+/**
+ * Función que transforma las coordenadas reales a las coordenadas de los mapas creados
+ * @param {Number[]} coordinates Array con las coordenadas [longitud, latitud]
+ * @returns Las coordenadas correspondientes a los mapas
+ */
+export function getMapCoordinates(coordinates) {
+    let longitude, latitude;
+    if (coordinates[1] < 30) {
         // Si la latitud es inferior a 30 se mapea con respecto al mapa de las Islas Canarias
-        longitud = (mapeo(coordenadas[0], minLon_can, maxLon_can, -mapaCan.userData.mapsX / 2, mapaCan.userData.mapsX / 2)) - 10;
-        latitud = mapeo(coordenadas[1], minLat_can, maxLat_can, -mapaCan.userData.mapsY / 2, mapaCan.userData.mapsY);
+        longitude = (mapping(coordinates[0], minLon_can, maxLon_can, -mapCan.userData.mapsX / 2, mapCan.userData.mapsX / 2)) - 10;
+        latitude = mapping(coordinates[1], minLat_can, maxLat_can, -mapCan.userData.mapsY / 2, mapCan.userData.mapsY);
     }
     else {
-        longitud = mapeo(coordenadas[0], minLon_es, maxLon_es, -(mapaEs.userData.mapsX / 2), mapaEs.userData.mapsX / 2);
-        latitud = mapeo(coordenadas[1], minLat_es, maxLat_es, -(mapaEs.userData.mapsY / 2), mapaEs.userData.mapsY / 2);
+        longitude = mapping(coordinates[0], minLon_es, maxLon_es, -(mapEs.userData.mapsX / 2), mapEs.userData.mapsX / 2);
+        latitude = mapping(coordinates[1], minLat_es, maxLat_es, -(mapEs.userData.mapsY / 2), mapEs.userData.mapsY / 2);
     }
-    return [longitud, latitud];
+    return [longitude, latitude];
 }
 
-// Función que mapea una coordenada a los mapas
-function mapeo(val, vmin, vmax, dmin, dmax) {
+/**
+ * Función que mapea una coordenada a los mapas
+ * @param {Number} val Valor que se desea mapear
+ * @param {Number} vmin Valor mínimo del rango de partida
+ * @param {Number} vmax Valor máximo del rango de partida
+ * @param {Number} dmin Valor mínimo del rango destino
+ * @param {Number} dmax Valor máximo del rango destino
+ * @returns El valor mapeado
+ */
+function mapping(val, vmin, vmax, dmin, dmax) {
     //Normaliza valor en el rango de partida, t=0 en vmin, t=1 en vmax
     let t = 1 - (vmax - val) / (vmax - vmin);
     return dmin + t * (dmax - dmin);
 }
 
-// Función que mustra los datos de un proceso electoral y una provincia
-// indiceEleccion: Índice en el array en el que se almacenan los datos electores
-// provincia: Provincia que se desea visualizar. Si es "Todas" se visualizan todas
-export function mostrarDatosEleccion(indiceEleccion, provincia) {
-    let cubosEleccion, cubosProvincia;
+/**
+ * Función que mustra los datos de un proceso electoral y una provincia
+ * @param {Number} electionIndex Índice en el array en el que se almacenan los datos electores
+ * @param {String} province Provincia que se desea visualizar. Si es "Todas" se visualizan todas
+ */
+export function showElectionData(electionIndex, province) {
+    let electionCubes, provinceCubes;
 
-    if (eleccionActual != undefined) {
-        cubosEleccion = objetos[eleccionActual[1]];
-        for (let i = 0; i < cubosEleccion.length; i++) {
-            cubosProvincia = cubosEleccion[i];
-            for (let j = 0; j < cubosProvincia.length; j++) {
-                cubosProvincia[j].visible = false;
+    if (actualElection != undefined) {
+        electionCubes = objects[actualElection[1]];
+        for (let i = 0; i < electionCubes.length; i++) {
+            provinceCubes = electionCubes[i];
+            for (let j = 0; j < provinceCubes.length; j++) {
+                provinceCubes[j].visible = false;
             }
         }
     }
 
-    cubosEleccion = objetos[indiceEleccion];
-    for (let i = 0; i < cubosEleccion.length; i++) {
-        cubosProvincia = cubosEleccion[i];
-        for (let j = 0; j < cubosProvincia.length; j++) {
-            if (provincia == "Todas" || cubosProvincia[j].userData.nombre == provincia) {
-                cubosProvincia[j].visible = true;
+    electionCubes = objects[electionIndex];
+    for (let i = 0; i < electionCubes.length; i++) {
+        provinceCubes = electionCubes[i];
+        for (let j = 0; j < provinceCubes.length; j++) {
+            if (province == "Todas" || provinceCubes[j].userData.name == province) {
+                provinceCubes[j].visible = true;
             }
         }
     }
