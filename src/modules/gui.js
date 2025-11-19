@@ -178,7 +178,7 @@ function createGeneralResultsInfo() {
         let headers = electionData[i].headers;
         let element = document.createElement("div");
 
-        element.innerHTML = "Resultados Generales - elections de " + electionTexts[i];
+        element.innerHTML = "Resultados Generales - Elecciones de " + electionTexts[i];
         for (let j = 1; j < totals.length; j++) {
             let partyInfo = document.createElement("div");
             let partyName = document.createElement("span");
@@ -207,7 +207,7 @@ function createProvinceResultsInfo() {
         for (let j = 0; j < results.length; j++) {
             let element = document.createElement("div");
             element.id = results[j][0];
-            element.innerHTML = "Resultados de la provincia de " + element.id + " - elections de " + electionTexts[i];
+            element.innerHTML = "Resultados de la provincia de " + element.id + " - Elecciones de " + electionTexts[i];
 
             for (let k = 1; k < results[j].length; k++) {
                 if(results[j][k] != 0) {
