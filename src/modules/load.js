@@ -183,6 +183,31 @@ export function getColor(electionIndex, partyIndex, getNumber = true) {
 }
 
 /**
+ * Función que obtiene los colores de los partidos con representación en una provincia o a nivel nacional
+ * @param {Number} electionIndex Índice de la elección actual en el array de datos electorales
+ * @param {String} province Provincia seleccionada
+ * @returns Array con los colores de los partidos con representación en la provincia o a nivel nacional
+ */
+export function getSelectedColors(electionIndex, province) {
+    let selectedColors = [];
+
+    if (province == "Todas") {
+        return colorData[electionIndex];
+    }
+    else {
+        const electionResults = electionData[electionIndex].results;
+        const provinceResults = electionResults.find((value) => value[0] == province);
+
+        for (let i = 1; i < provinceResults.length; i++) {
+            if (provinceResults[i] != "0") {
+                selectedColors.push(getColor(electionIndex, i));
+            }
+        }
+    }
+    return selectedColors;
+}
+
+/**
  * Función para obtener las coordenadas de una provincia de los datos geográficos
  * @param {String} province Nombre de la provincia
  * @returns Las coordenadas de la provincia buscada

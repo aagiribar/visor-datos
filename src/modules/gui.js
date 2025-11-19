@@ -1,5 +1,5 @@
 import { GUI } from "lil-gui";
-import { electionData, geoData, getColor, getCoordinates, elections } from "./load.js";
+import { electionData, geoData, getColor, getCoordinates, elections, getSelectedColors } from "./load.js";
 import { showElectionData, getMapCoordinates } from "./dataObjects.js";
 
 // Array con los textos que mostrar en el selector
@@ -47,6 +47,9 @@ export const gui = new GUI();
 let uiElements;
 let mapSelector, electionSelector, provinceSelector;
 
+// Array que almacena los colores mostrados en los resultados para utilizarlos en el shader de fondo
+export let actualSelectedColors;
+
 /**
  * Función que crea la interfaz de usuario
  */
@@ -89,6 +92,8 @@ export function createGUI() {
                 actualInfo = provinceInfoElements[actualElection[1]][index];
                 info.appendChild(actualInfo);
             }
+            
+            actualSelectedColors = getSelectedColors(actualElection[1], actualProvince);
         }
     );
 
@@ -102,6 +107,8 @@ export function createGUI() {
             info.removeChild(actualInfo);
             showElectionData(actualElection[1], value);
             actualProvince = value;
+
+            actualSelectedColors = getSelectedColors(actualElection[1], actualProvince);
 
             // Añade el elemento de información correspondiente y cambia el foco de la cámara
             if (value == "Todas") {
@@ -122,6 +129,7 @@ export function createGUI() {
         }
     )
     actualElection = [elections[0], 0];
+    actualSelectedColors = getSelectedColors(actualElection[1], actualProvince);
 }
 
 /**
