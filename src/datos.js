@@ -1,8 +1,8 @@
-import { createGUI, createInfo, cameraFocus, actualSelectedColors } from "./modules/gui";
+import { createGUI, createInfo, cameraFocus } from "./modules/gui";
 import { loadData } from "./modules/load";
 import { createSimObjects, scene, orbitControl, renderer, camera } from "./modules/simObjects";
 import { createDataObjects } from "./modules/dataObjects";
-import { bgCamera, bgMaterial, bgScene, clock, createBackground, getColorObjectsFromNumbers } from "./modules/background";
+import { bgCamera, bgMaterial, bgScene, clock, createBackground } from "./modules/background";
 
 // Se cargan los datos necesarios
 loadData().then(() => {
@@ -13,20 +13,18 @@ loadData().then(() => {
 });
 
 function init() {
+    createBackground();
     createInfo();
     createSimObjects();
     createGUI();
     createDataObjects();
-    createBackground();
 }
 
 function animationLoop() {
     requestAnimationFrame(animationLoop);
 
     const elapsedTime = clock.getElapsedTime();
-
     bgMaterial.uniforms.u_time.value = elapsedTime;
-    bgMaterial.uniforms.u_colors.value = getColorObjectsFromNumbers(actualSelectedColors);
 
     // Se recoloca el foco de la camara orbital
     orbitControl.target.x = cameraFocus[0];

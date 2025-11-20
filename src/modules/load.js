@@ -200,7 +200,7 @@ export function getSelectedColors(electionIndex, province) {
 
         for (let i = 1; i < provinceResults.length; i++) {
             if (provinceResults[i] != "0") {
-                selectedColors.push(getColor(electionIndex, i));
+                selectedColors.push(getColor(electionIndex, i - 1));
             }
         }
     }
