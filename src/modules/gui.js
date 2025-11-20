@@ -168,7 +168,7 @@ export function createInfo() {
     info.style.backgroundColor = 'transparent';
     info.style.zIndex = '1';
     info.style.fontFamily = 'Monospace';
-    info.innerHTML = "Resultados";
+    info.innerHTML = "Resultados de las elecciones al Congreso de los Diputados";
     document.body.appendChild(info);
     createGeneralResultsInfo();
     createProvinceResultsInfo();
