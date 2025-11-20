@@ -113,12 +113,10 @@ export function createBackground() {
  * @param {Number[] | String[]} colorList Array de colores en formato numérico
  */
 export function setBgColorPalette(colorList) {
-    console.log(colorList);
     const count = Math.min(colorList.length, MAX_COLORS);
     bgMaterial.uniforms.u_count.value = count;
 
     let colorArray = new Array(MAX_COLORS);
-    console.log(colorArray);
 
     for (let i = 0; i < MAX_COLORS; i++) {
         if (i < count) {
