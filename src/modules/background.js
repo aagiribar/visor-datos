@@ -19,6 +19,9 @@ const uniforms = {
     },
     u_count: {
         value: 0.0
+    },
+    u_intensity: {
+        value: 0.3
     }
 }
 
@@ -35,8 +38,9 @@ const fragmentShader = `
     #define MAX_COLORS 20
 
     uniform float u_time;
-    uniform vec3 u_colors[MAX_COLORS]; // Array de tamaño fijo
-    uniform float u_count;               // Cantidad real de colores en uso
+    uniform vec3 u_colors[MAX_COLORS];  // Array de tamaño fijo con los colores
+    uniform float u_count;              // Cantidad real de colores en uso
+    uniform float u_intensity;          // Intensidad del shader
 
     varying vec2 vUv;
 
@@ -82,7 +86,7 @@ const fragmentShader = `
         // Mezclamos
         vec3 finalColor = mix(colorA, colorB, t);
 
-        gl_FragColor = vec4(finalColor * 0.3, 1.0);
+        gl_FragColor = vec4(finalColor * u_intensity, 1.0);
     }
 `;
 

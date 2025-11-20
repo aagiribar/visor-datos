@@ -1,7 +1,7 @@
 import { GUI } from "lil-gui";
 import { electionData, geoData, getColor, getCoordinates, elections, getSelectedColors } from "./load.js";
 import { showElectionData, getMapCoordinates } from "./dataObjects.js";
-import { setBgColorPalette } from "./background.js";
+import { bgMaterial, setBgColorPalette } from "./background.js";
 
 // Array con los textos que mostrar en el selector
 export const electionTexts = [
@@ -46,7 +46,7 @@ export let cameraFocus = [0, 0, 0];
 // Creación de la interfaz de usuario
 export const gui = new GUI();
 export let uiElements;
-let mapSelector, electionSelector, provinceSelector;
+let mapSelector, electionSelector, provinceSelector, bgIntensitySelector;
 
 // Array que almacena los colores mostrados en los resultados para utilizarlos en el shader de fondo
 let actualSelectedColors;
@@ -60,7 +60,8 @@ export function createGUI() {
         "Mapa seleccionado": "España",
         "Elección seleccionada": electionTexts[0],
         "Provincia": "Todas",
-        "Mostrar fondo": true
+        "Mostrar fondo": true,
+        "Intensidad del fondo": 0.3
     }
 
     // Selector de mapa sobre el que orbitará la cámara
@@ -135,7 +136,21 @@ export function createGUI() {
     actualSelectedColors = getSelectedColors(actualElection[1], actualProvince);
     setBgColorPalette(actualSelectedColors);
 
-    gui.add(uiElements, "Mostrar fondo", true);
+    // Selector para mostrar el shader de fondo
+    gui.add(uiElements, "Mostrar fondo", true).onChange((value) => {
+        if (value) {
+            bgIntensitySelector.show();
+        }
+        else {
+            bgIntensitySelector.hide();
+        }
+    });
+
+    // Selector para seleccionar la intensidad del shader de fondo
+    bgIntensitySelector = gui.add(uiElements, "Intensidad del fondo", 0.1, 1.0, 0.1);
+    bgIntensitySelector.onChange((value) => {
+        bgMaterial.uniforms.u_intensity.value = value;
+    });
 }
 
 /**
