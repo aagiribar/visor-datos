@@ -45,7 +45,7 @@ export let cameraFocus = [0, 0, 0];
 
 // Creación de la interfaz de usuario
 export const gui = new GUI();
-let uiElements;
+export let uiElements;
 let mapSelector, electionSelector, provinceSelector;
 
 // Array que almacena los colores mostrados en los resultados para utilizarlos en el shader de fondo
@@ -59,7 +59,8 @@ export function createGUI() {
     uiElements = {
         "Mapa seleccionado": "España",
         "Elección seleccionada": electionTexts[0],
-        "Provincia": "Todas"
+        "Provincia": "Todas",
+        "Mostrar fondo": true
     }
 
     // Selector de mapa sobre el que orbitará la cámara
@@ -133,6 +134,8 @@ export function createGUI() {
     actualElection = [elections[0], 0];
     actualSelectedColors = getSelectedColors(actualElection[1], actualProvince);
     setBgColorPalette(actualSelectedColors);
+
+    gui.add(uiElements, "Mostrar fondo", true);
 }
 
 /**

@@ -1,4 +1,4 @@
-import { createGUI, createInfo, cameraFocus } from "./modules/gui";
+import { createGUI, createInfo, cameraFocus, uiElements } from "./modules/gui";
 import { loadData } from "./modules/load";
 import { createSimObjects, scene, orbitControl, renderer, camera } from "./modules/simObjects";
 import { createDataObjects } from "./modules/dataObjects";
@@ -34,8 +34,10 @@ function animationLoop() {
 
     renderer.clear();
 
-    // Se renderiza la escene del fondo
-    renderer.render(bgScene, bgCamera);
+    if (uiElements["Mostrar fondo"]) {
+        // Se renderiza la escene del fondo si el usuario lo desea
+        renderer.render(bgScene, bgCamera);
+    }
 
     // Se renderiza la esce
     renderer.render(scene, camera);
