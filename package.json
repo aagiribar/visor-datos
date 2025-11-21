@@ -1,6 +1,6 @@
 {
   "name": "visor-datos-agustin",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Visualización de resultados de las elecciones al Congreso de los Diputados de España por provincias realizada con three.js.",
   "scripts": {
     "start": "parcel ./src/index.html",

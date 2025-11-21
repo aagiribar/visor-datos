@@ -39,6 +39,6 @@ function animationLoop() {
         renderer.render(bgScene, bgCamera);
     }
 
-    // Se renderiza la esce
+    // Se renderiza la escena principal
     renderer.render(scene, camera);
 }
