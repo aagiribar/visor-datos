@@ -11,7 +11,7 @@ La versión web de este proyecto se encuentra en [este sandbox de codesandbox](h
 
 El código se puede acceder desde [este enlace](https://codesandbox.io/p/sandbox/3gtygw).
 
-Un vídeo demostrativo de la simulación puede ser encontrado en [este enlace](https://youtu.be/2deQAGUoMj8).
+Un vídeo demostrativo de la simulación puede ser encontrado en [este enlace](https://youtu.be/AVAbGLv5uQM).
 
 ## Ejecución del proyecto en local
 
@@ -121,6 +121,8 @@ SUMAR;0xef4b90
 La simulación incluye un shader, presente en el fondo de la simulación, que muestra un efecto utilizando los colores de los partidos de los resultados mostrados en ese momento.
 
 Dicho shader se muestra en la simulación utilizando una escena adicional, consistente en un plano con material __ShaderMaterial__ y una cámara ortográfica apuntando hacia él. Dicha escena se renderiza solamente si el usuario ha marcado la opción ```Mostrar fondo``` de la interfaz de usuario.
+
+El código completo del shader se encuentra [aquí](src/shaders/background/fragment.glsl)
 
 ```javascript
 renderer.clear();
